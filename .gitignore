@@ -15,6 +15,7 @@ src/test_bitcoin
 *.qm
 Makefile
 bitcoin-qt
+bytecoin-qt
 
 # Resources cpp
 qrc_*.cpp
@@ -27,3 +28,12 @@ qrc_*.cpp
 build
 
 !src/leveldb-*/Makefile
+
+src/Signature*
+bin/*
+src/block*
+doc/useful-commands.txt
+src/bytecoind
+test-json-output.txt
+src/profmac.*
+
