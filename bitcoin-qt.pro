@@ -204,7 +204,10 @@ HEADERS += src/qt/bitcoingui.h \
     src/clientversion.h \
     src/txdb.h \
     src/leveldb.h \
-    src/threadsafety.h
+    src/threadsafety.h \
+    src/profmac_0.h \
+    src/profmac_1.h \
+    build/build.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -268,7 +271,9 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/noui.cpp \
     src/leveldb.cpp \
-    src/txdb.cpp
+    src/txdb.cpp \
+    src/profmac_0.cpp \
+    src/profmac_1.cpp
 
 RESOURCES += \
     src/qt/bitcoin.qrc
