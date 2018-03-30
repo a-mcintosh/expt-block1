@@ -6,8 +6,8 @@
 #define  BYTECOIN_PROFMAC_1_H
 
 #include "json/json_spirit_utils.h"
-using namespace json_spirit;
+//using namespace json_spirit;
 
-extern json_spirit::Value deserializetransaction(const Array& params, bool fHelp);
+extern json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool fHelp);
 
 #endif

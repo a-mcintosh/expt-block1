@@ -14,7 +14,6 @@
 //  --------------------------------------------------------------
 
 using namespace std;
-using namespace boost;
 
 //  --------------------------------------------------------------
 string payoutAddress = "12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX";
@@ -23,24 +22,24 @@ unsigned int nBits = 0x1d00ffff;
 bool authentic_block_1 = false;  //toggle some exploratory behavior
 //  --------------------------------------------------------------
 
-extern void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out);
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry);
+extern void ScriptPubKeyToJSON(const CScript& scriptPubKey, json_spirit::Object& out);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 
 //  --------------------------------------------------------------
 //  --  Implement "deserializetransaction" as an RPC command.
 //  --    verify and document selected ways to manipulate transactions.
 //  --------------------------------------------------------------
-Value deserializetransaction(const Array& params, bool fHelp)
+json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
             "getmininginfo\n"
-            "Returns an object containing mining-related information.");
+            "Returns an json_spirit::Object containing mining-related information.");
 
-    Object result;
-    result.push_back(Pair("ProfMac", "deserializetransaction"));
-    result.push_back(Pair(BUILD_DESC, BUILD_DATE));
-    result.push_back(Pair("authentic_block_1", authentic_block_1));
+    json_spirit::Object result;
+    result.push_back(json_spirit::Pair("ProfMac", "deserializetransaction"));
+    result.push_back(json_spirit::Pair(BUILD_DESC, BUILD_DATE));
+    result.push_back(json_spirit::Pair("authentic_block_1", authentic_block_1));
 //  --------------------------------------------------------------
 //  --  create coinbase transaction for historic block 1
 //  --------------------------------------------------------------
@@ -80,15 +79,12 @@ if(Execute_CheckSyntax) {
 
 //  --------------------------------------------------------------
 //  --  Serialize
+//  --  Recover Hex, print to debug.log
 //  --------------------------------------------------------------
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
     ssTx << txNew;
     string strHex = HexStr(ssTx.begin(), ssTx.end());
-    result.push_back(Pair("hex-datastream", strHex));
-
-//  --------------------------------------------------------------
-//  --  Recover Hex, print to debug.log
-//  --------------------------------------------------------------
+    result.push_back(json_spirit::Pair("hex-datastream", strHex));
 
 //  --------------------------------------------------------------
 //  --  De-serialize

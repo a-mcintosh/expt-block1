@@ -133,7 +133,8 @@ OBJS= \
     obj/noui.o \
     obj/leveldb.o \
     obj/txdb.o \
-    obj/profmac_1.o
+    obj/profmac_1.o \
+    obj/profmac_0.o
 
 
 all: bitcoind
