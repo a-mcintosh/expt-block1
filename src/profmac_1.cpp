@@ -31,19 +31,29 @@ extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spiri
 //  --------------------------------------------------------------
 json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool fHelp)
 {
-    if (fHelp || params.size() != 0)
+    if (fHelp || 3 < params.size())
         throw runtime_error(
-            "getmininginfo\n"
+            "deserializetransaction [authentic_block_1=false]\n"
             "Returns an json_spirit::Object containing mining-related information.");
 
+//  --------------------------------------------------------------
+//  --  dump a lot of parameters, mostly to learn the type system.
+//  --------------------------------------------------------------
     json_spirit::Object result;
     result.push_back(json_spirit::Pair("ProfMac", "deserializetransaction"));
     result.push_back(json_spirit::Pair(BUILD_DESC, BUILD_DATE));
+    result.push_back(json_spirit::Pair("params.size()", params.size()));
+    result.push_back(json_spirit::Pair("parameters", params));
+    for (uint ix=0; ix < params.size(); ix++) {
+      result.push_back(json_spirit::Pair(boost::to_string(ix), params[ix].type()));}
+//  --
+    if (params.size() > 0) authentic_block_1 = ("true" == params[0].get_str());
+    if(authentic_block_1) bnExtraNonce = 3;
     result.push_back(json_spirit::Pair("authentic_block_1", authentic_block_1));
+
 //  --------------------------------------------------------------
 //  --  create coinbase transaction for historic block 1
 //  --------------------------------------------------------------
-
     static CReserveKey reservekey(pwalletMain);
 
     //
@@ -56,13 +66,13 @@ json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool
     txNew.vout.resize(0);
 
     CScript scriptPubKey;
-    if(authentic_block_1)
+    if(authentic_block_1) {
       scriptPubKey = CScript() << ParseHex("0496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858ee") << OP_CHECKSIG;
-    else {
+    } else {
       scriptPubKey << reservekey.GetReservedKey() << OP_CHECKSIG;
-      txNew.vout.push_back(CTxOut(50 * COIN, scriptPubKey));
       reservekey.KeepKey();
     }
+    txNew.vout.push_back(CTxOut(50 * COIN, scriptPubKey));
 
 bool Execute_CheckSyntax = false;
 if(Execute_CheckSyntax) {
