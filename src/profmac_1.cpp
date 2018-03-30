@@ -53,6 +53,8 @@ extern void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out);
 
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry);
 
+CBigNum bnExtraNonce = 3;
+unsigned int nBits = 0x1d00ffff;
 
 string JSONRPCRequest2(const string& strMethod, const Array& params, const Value& id)
 {
@@ -83,16 +85,18 @@ Value deserializetransaction(const Array& params, bool fHelp)
 
     static CReserveKey reservekey(pwalletMain);
 
+    //
     // Create coinbase tx
+    //
     CTransaction txNew;
     txNew.vin.resize(1);
     txNew.vin[0].prevout.SetNull();
-    txNew.vin[0].scriptSig = CScript() << OP_0 << OP_0;
+    txNew.vin[0].scriptSig << nBits << ++bnExtraNonce;
     txNew.vout.resize(0);
 
     CScript scriptPubKey;
-//    scriptPubKey.SetDestination(CBitcoinAddress(reservekey.GetReservedKey().GetID()).Get());
-    scriptPubKey.SetDestination(CBitcoinAddress("12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX").Get());
+    scriptPubKey = CScript() << ParseHex("0496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858ee") << OP_CHECKSIG;
+
     txNew.vout.push_back(CTxOut(50 * COIN, scriptPubKey));
 
 
