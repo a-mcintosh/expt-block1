@@ -40,6 +40,7 @@ Value deserializetransaction(const Array& params, bool fHelp)
     Object result;
     result.push_back(Pair("ProfMac", "deserializetransaction"));
     result.push_back(Pair(BUILD_DESC, BUILD_DATE));
+    result.push_back(Pair("authentic_block_1", authentic_block_1));
 //  --------------------------------------------------------------
 //  --  create coinbase transaction for historic block 1
 //  --------------------------------------------------------------
