@@ -1,73 +1,34 @@
 //  --------------------------------------------------------------
 //  --  Goal:  manipulate serialized transaction
+//  --  use bitcoin block 1 as a reference.
 //  --------------------------------------------------------------
 
 #include "uint256.h"
+#include "profmac_0.h"
 #include "profmac_1.h"
-
-#include "util.h"
-#include "json/json_spirit_utils.h"
-#include "wallet.h"
-
-#include "main.h"
-#include "db.h"
 #include "init.h"
 #include "bitcoinrpc.h"
+#include "build.h"
 
 //  --------------------------------------------------------------
-#include <boost/asio.hpp>
-#include <boost/asio/ip/v6_only.hpp>
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/shared_ptr.hpp>
-using namespace boost;
-using namespace boost::asio;
 //  --------------------------------------------------------------
 
-using namespace json_spirit;
 using namespace std;
-
+using namespace boost;
 
 //  --------------------------------------------------------------
-//  --  moved some constants here so I can change them easier.
-//  --------------------------------------------------------------
-
-uint256 hashGenesisBlockStd ( "0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-uint256 hashGenesisBlockTest ("0x000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
-uint256 hashGenesisBlock(hashGenesisBlockStd);
-const char chHashTarget[] = \
-			"00000000ffff0000000000000000000000000000000000000000000000000000";
-const char chPreviousBlockHash[] = \
-			"000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f";
-//payoutAddress = "12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX";
+string payoutAddress = "12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX";
+CBigNum bnExtraNonce = 3;
+unsigned int nBits = 0x1d00ffff;
+bool authentic_block_1 = false;  //toggle some exploratory behavior
 //  --------------------------------------------------------------
 
 extern void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out);
-
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry);
 
-CBigNum bnExtraNonce = 3;
-unsigned int nBits = 0x1d00ffff;
-
-string JSONRPCRequest2(const string& strMethod, const Array& params, const Value& id)
-{
-    Object request;
-    request.push_back(Pair("method", strMethod));
-    request.push_back(Pair("params", params));
-    request.push_back(Pair("id", id));
-    return write_string(Value(request), false) + "\n";
-}
-
-
 //  --------------------------------------------------------------
-//  --  capture behavior of some serialization libraries
+//  --  Implement "deserializetransaction" as an RPC command.
+//  --    verify and document selected ways to manipulate transactions.
 //  --------------------------------------------------------------
 Value deserializetransaction(const Array& params, bool fHelp)
 {
@@ -77,8 +38,8 @@ Value deserializetransaction(const Array& params, bool fHelp)
             "Returns an object containing mining-related information.");
 
     Object result;
-    result.push_back(Pair("ProfMac", "Testing"));
-
+    result.push_back(Pair("ProfMac", "deserializetransaction"));
+    result.push_back(Pair(BUILD_DESC, BUILD_DATE));
 //  --------------------------------------------------------------
 //  --  create coinbase transaction for historic block 1
 //  --------------------------------------------------------------
@@ -95,24 +56,34 @@ Value deserializetransaction(const Array& params, bool fHelp)
     txNew.vout.resize(0);
 
     CScript scriptPubKey;
-    scriptPubKey = CScript() << ParseHex("0496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858ee") << OP_CHECKSIG;
+    if(authentic_block_1)
+      scriptPubKey = CScript() << ParseHex("0496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858ee") << OP_CHECKSIG;
+    else {
+      scriptPubKey << reservekey.GetReservedKey() << OP_CHECKSIG;
+      txNew.vout.push_back(CTxOut(50 * COIN, scriptPubKey));
+      reservekey.KeepKey();
+    }
 
-    txNew.vout.push_back(CTxOut(50 * COIN, scriptPubKey));
-
-
-  if(true) {
-    string strPrint;
-    printf("profmac_1.cpp line 73: %s\n", strPrint.c_str());
-  }
-    TxToJSON(txNew, 0, result);
+bool Execute_CheckSyntax = false;
+if(Execute_CheckSyntax) {
+}
 
 //  --------------------------------------------------------------
 //  --  use TxToJSON and print to debug.log
 //  --------------------------------------------------------------
+    TxToJSON(txNew, 0, result);
+    if(true) {
+      string strPrint;
+      printf("profmac_1.cpp line 73: %s\n", strPrint.c_str());
+    }
 
 //  --------------------------------------------------------------
 //  --  Serialize
 //  --------------------------------------------------------------
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << txNew;
+    string strHex = HexStr(ssTx.begin(), ssTx.end());
+    result.push_back(Pair("hex-datastream", strHex));
 
 //  --------------------------------------------------------------
 //  --  Recover Hex, print to debug.log
@@ -135,7 +106,7 @@ Value deserializetransaction(const Array& params, bool fHelp)
 //  --------------------------------------------------------------
 
 //  --------------------------------------------------------------
-//  --  Pro-forma templace to be metamorphasized.
+//  --  Pro-forma template to be metamorphasized.
 //  --------------------------------------------------------------
 
     return result;
