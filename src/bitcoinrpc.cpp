@@ -238,7 +238,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getblockhash",           &getblockhash,           false,  false },
     { "gettransaction",         &gettransaction,         false,  false },
     { "listtransactions",       &listtransactions,       false,  false },
-    { "deserializetransaction", &deserializetransaction, false,  false },
+    { "expt_block1", &expt_block1, false,  false },
     { "listaddressgroupings",   &listaddressgroupings,   false,  false },
     { "signmessage",            &signmessage,            false,  false },
     { "verifymessage",          &verifymessage,          false,  false },
@@ -1205,8 +1205,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listaccounts"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "walletpassphrase"       && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getblocktemplate"       && n > 0) ConvertTo<Object>(params[0]);
-    if (strMethod == "deserializetransaction" && n > 0) ConvertTo<Object>(params[0]);
-    if (strMethod == "deserializetransaction" && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "expt_block1" && n > 0) ConvertTo<Object>(params[0]);
+    if (strMethod == "expt_block1" && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "listsinceblock"         && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "sendmany"               && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "sendmany"               && n > 2) ConvertTo<boost::int64_t>(params[2]);
