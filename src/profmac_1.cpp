@@ -29,7 +29,7 @@ extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spiri
 //  -- END INCLUDE STUFF
 //  -- BEGIN USER CUSTOMIZATION STUFF
 //  --------------------------------------------------------------
-bool bAuthentic_block_1 = false;  //toggle some exploratory behavior
+bool bAuthentic_block_1 = true;  //toggle some exploratory behavior
 //  --------------------------------------------------------------
 CBigNum bnExtraNonce = 3;
 unsigned int nBits = 0x1d00ffff;
