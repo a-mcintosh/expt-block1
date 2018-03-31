@@ -44,8 +44,10 @@ json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool
     result.push_back(json_spirit::Pair(BUILD_DESC, BUILD_DATE));
     result.push_back(json_spirit::Pair("params.size()", params.size()));
     result.push_back(json_spirit::Pair("parameters", params));
+    json_spirit::Array arry;
     for (uint ix=0; ix < params.size(); ix++) {
-      result.push_back(json_spirit::Pair(boost::to_string(ix), params[ix].type()));}
+      arry.push_back(params[ix].type());}
+    result.push_back(json_spirit::Pair("parameter_types",arry));
 //  --
     if (params.size() > 0) authentic_block_1 = ("true" == params[0].get_str());
     if(authentic_block_1) bnExtraNonce = 3;
@@ -88,7 +90,7 @@ if(Execute_CheckSyntax) {
     }
 
 //  --------------------------------------------------------------
-//  --  Serialize
+//  --  Serialize the transaction
 //  --  Recover Hex, print to debug.log
 //  --------------------------------------------------------------
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -97,9 +99,21 @@ if(Execute_CheckSyntax) {
     result.push_back(json_spirit::Pair("hex-datastream", strHex));
 
 //  --------------------------------------------------------------
+//  -- Recover Txn from stream, edit, print to debug.log
+//  --------------------------------------------------------------
+    CTransaction txRecover;
+    ssTx >> txRecover;  //  -- test an idempotent operation.
+    txRecover.vout[0].nValue = 20 * COIN;
+    json_spirit::Object recover;
+    TxToJSON(txRecover, 0, recover);
+    result.push_back(json_spirit::Pair("ProfMac", "process-txRecover"));
+    result.push_back(json_spirit::Pair("regenerated", recover));
+//  --------------------------------------------------------------
 //  --  De-serialize
 //  --------------------------------------------------------------
-
+    CDataStream stm(SER_NETWORK, PROTOCOL_VERSION);
+    stm << strHex;
+    
 //  --------------------------------------------------------------
 //  --  use TxToJSON and print to debug.log
 //  --------------------------------------------------------------
