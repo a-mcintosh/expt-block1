@@ -54,7 +54,7 @@ json_spirit::Value deserializetransaction(const json_spirit::Array& params, bool
     result.push_back(json_spirit::Pair("authentic_block_1", authentic_block_1));
 
 //  --------------------------------------------------------------
-//  --  create coinbase transaction for historic block 1
+//  --  create coinbase transaction de-novo for historic block 1
 //  --------------------------------------------------------------
     static CReserveKey reservekey(pwalletMain);
 
@@ -81,8 +81,9 @@ if(Execute_CheckSyntax) {
 }
 
 //  --------------------------------------------------------------
-//  --  use TxToJSON and print to debug.log
+//  --  use TxToJSON and include new txn in JSON return value
 //  --------------------------------------------------------------
+    result.push_back(json_spirit::Pair("ProfMac", "txNew"));
     TxToJSON(txNew, 0, result);
     if(true) {
       string strPrint;
@@ -90,33 +91,45 @@ if(Execute_CheckSyntax) {
     }
 
 //  --------------------------------------------------------------
-//  --  Serialize the transaction
-//  --  Recover Hex, print to debug.log
+//  --  Serialize the txn
+//  --  Recover Hex-string, include in JSON return value
 //  --------------------------------------------------------------
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
     ssTx << txNew;
+    result.push_back(json_spirit::Pair("ProfMac", "process-ssTx"));
+    result.push_back(json_spirit::Pair("ssTx.size", ssTx.size()));
     string strHex = HexStr(ssTx.begin(), ssTx.end());
     result.push_back(json_spirit::Pair("hex-datastream", strHex));
 
 //  --------------------------------------------------------------
-//  -- Recover Txn from stream, edit, print to debug.log
+//  -- Recover Txn from stream, edit, include in JSON return value
 //  --------------------------------------------------------------
     CTransaction txRecover;
     ssTx >> txRecover;  //  -- test an idempotent operation.
     txRecover.vout[0].nValue = 20 * COIN;
-    json_spirit::Object recover;
-    TxToJSON(txRecover, 0, recover);
-    result.push_back(json_spirit::Pair("ProfMac", "process-txRecover"));
-    result.push_back(json_spirit::Pair("regenerated", recover));
+    result.push_back(json_spirit::Pair("ProfMac", "txRecover"));
+    TxToJSON(txRecover, 0, result);
+
 //  --------------------------------------------------------------
-//  --  De-serialize
+//  -- Recover Txn from hex-string, edit, include in JSON return value
 //  --------------------------------------------------------------
-    CDataStream stm(SER_NETWORK, PROTOCOL_VERSION);
-    stm << strHex;
+    CDataStream ssTxInjected(SER_NETWORK, PROTOCOL_VERSION);
+    ssTxInjected << ParseHex(strHex);
+    ssTxInjected.ignore(1); 
+    result.push_back(json_spirit::Pair("ProfMac", "process-ssTxInjected"));
+    result.push_back(json_spirit::Pair("ssTxInjected.size", ssTxInjected.size()));
+    strHex = HexStr(ssTxInjected.begin(), ssTxInjected.end());
+    result.push_back(json_spirit::Pair("hex-datastream-injected", strHex));
+
+    CTransaction txRecoverInjected;
+    ssTxInjected >> txRecoverInjected;  //  -- test an idempotent operation.
+    txRecoverInjected.vout[0].nValue = 30 * COIN;
     
 //  --------------------------------------------------------------
-//  --  use TxToJSON and print to debug.log
+//  --  use TxToJSON and include in JSON return value
 //  --------------------------------------------------------------
+    result.push_back(json_spirit::Pair("ProfMac", "txRecoverInjected"));
+    TxToJSON(txRecoverInjected, 0, result);
 
 //  --------------------------------------------------------------
 //  --  Mine new nonce
