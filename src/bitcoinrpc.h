@@ -107,6 +107,7 @@ private:
     std::map<std::string, const CRPCCommand*> mapCommands;
 public:
     CRPCTable();
+    unsigned int CRPCTableInsert(CRPCCommand *newbie);
     const CRPCCommand* operator[](std::string name) const;
     std::string help(std::string name) const;
 

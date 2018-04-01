@@ -274,6 +274,14 @@ CRPCTable::CRPCTable()
     }
 }
 
+//    std::map<std::string, const CRPCCommand*> mapCommands;
+//  current work site.  Does nothing.  Pro-forma hook
+unsigned int CRPCTable::CRPCTableInsert(CRPCCommand *newbie)
+{
+//    mapCommands[*newbie->name] = newbie;
+    return 7;
+}
+
 const CRPCCommand *CRPCTable::operator[](string name) const
 {
     map<string, const CRPCCommand*>::const_iterator it = mapCommands.find(name);
